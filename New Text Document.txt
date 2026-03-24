@@ -1,0 +1,69 @@
+-- 1. สร้างฐานข้อมูลและเลือกใช้งาน
+CREATE DATABASE IF NOT EXISTS reservation_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE reservation_db;
+
+-- ==========================================
+-- 2. สร้างตารางและข้อมูลผู้ป่วย (Patients Table)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS patients (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT 'รหัสผู้ป่วย',
+    hn_number VARCHAR(20) NOT NULL UNIQUE COMMENT 'เลขประจำตัวผู้ป่วย (HN)',
+    prefix VARCHAR(20) COMMENT 'คำนำหน้าชื่อ',
+    first_name VARCHAR(100) NOT NULL COMMENT 'ชื่อ',
+    last_name VARCHAR(100) NOT NULL COMMENT 'นามสกุล',
+    gender ENUM('ชาย', 'หญิง', 'อื่นๆ') DEFAULT 'อื่นๆ' COMMENT 'เพศ',
+    dob DATE NOT NULL COMMENT 'วันเกิด',
+    phone VARCHAR(20) NOT NULL COMMENT 'เบอร์โทร',
+    address TEXT COMMENT 'ที่อยู่',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'วันที่สร้างข้อมูล'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO patients (hn_number, prefix, first_name, last_name, gender, dob, phone, address) VALUES
+('HN000001', 'นาย', 'สมชาย', 'ใจดี', 'ชาย', '1985-05-15', '0812345678', 'กรุงเทพฯ'),
+('HN000002', 'นางสาว', 'สมศรี', 'รักษาดี', 'หญิง', '1990-11-20', '0898765432', 'กรุงเทพฯ'),
+('HN000003', 'เด็กชาย', 'ก้อนเมฆ', 'สีขาว', 'ชาย', '2015-02-01', '0611112222', 'เชียงใหม่'),
+('HN000004', 'นาง', 'กานดา', 'สุขสันต์', 'หญิง', '1975-08-10', '0912223333', 'เชียงใหม่'),
+('HN000005', 'นาย', 'ธนากร', 'เขียวเย็น', 'ชาย', '2000-01-01', '0855556666', 'สงขลา');
+
+-- ==========================================
+-- 3. สร้างตารางและข้อมูลแพทย์ (Doctors Table)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS doctors (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT 'รหัสแพทย์',
+    prefix VARCHAR(20) NOT NULL COMMENT 'คำนำหน้า',
+    first_name VARCHAR(100) NOT NULL COMMENT 'ชื่อแพทย์',
+    last_name VARCHAR(100) NOT NULL COMMENT 'นามสกุลแพทย์',
+    specialty VARCHAR(100) NOT NULL COMMENT 'ความเชี่ยวชาญ/แผนก',
+    phone VARCHAR(20) COMMENT 'เบอร์โทรศัพท์แพทย์',
+    is_active BOOLEAN DEFAULT TRUE COMMENT 'สถานะ 1=รับคิว, 0=ไม่รับคิว',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO doctors (prefix, first_name, last_name, specialty, phone) VALUES 
+('นพ.', 'สมชาย', 'ยอดเยี่ยม', 'อายุรกรรมทั่วไป', '0811112222'),
+('พญ.', 'สมศรี', 'รักษาดี', 'กุมารเวชกรรม', '0822223333'),
+('นพ.', 'เก่งกาจ', 'ฉลาดล้ำ', 'ศัลยกรรม', '0833334444');
+
+-- ==========================================
+-- 4. สร้างตารางและข้อมูลการจองคิว (Reservations Table)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS reservations (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY COMMENT 'รหัสการจอง',
+    patient_id INT(11) NOT NULL COMMENT 'รหัสผู้ป่วย',
+    doctor_id INT(11) NOT NULL COMMENT 'รหัสแพทย์',
+    reservation_date DATE NOT NULL COMMENT 'วันที่นัดหมาย',
+    reservation_time TIME NOT NULL COMMENT 'เวลานัดหมาย',
+    note TEXT COMMENT 'หมายเหตุ/อาการเบื้องต้น',
+    status ENUM('pending', 'confirmed', 'completed', 'cancelled') DEFAULT 'pending' COMMENT 'สถานะการจอง',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_reservation_patient FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    CONSTRAINT fk_reservation_doctor FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO reservations (patient_id, doctor_id, reservation_date, reservation_time, note, status) VALUES 
+(1, 1, '2026-04-10', '09:00:00', 'ปวดหัว มีไข้สูงต่อเนื่อง 2 วัน', 'confirmed'),
+(2, 2, '2026-04-12', '13:30:00', 'พาลูกมาฉีดวัคซีนตามนัด', 'pending'),
+(3, 3, '2026-04-15', '10:00:00', 'ปวดท้องด้านขวาล่างรุนแรง', 'confirmed'),
+(4, 1, '2026-04-20', '15:00:00', 'ตรวจสุขภาพประจำปี', 'completed'),
+(5, 2, '2026-04-22', '09:30:00', 'เด็กมีอาการผื่นแดงตามตัว', 'pending');

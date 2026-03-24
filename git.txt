@@ -1,0 +1,17 @@
+git config --global user.email "684259042@webmail.npru.ac.th"
+git config --global user.name "Chainarin04"
+
+
+ครั้งแรก
+git init
+git add .
+git commit -m "First commit"  บันทึกการเปลี่ยนแปลงพร้อมข้อความอธิบาย
+git branch -M main
+git remote add origin https://www.youtube.com/watch?v=ANWzr8EDoiw – เชื่อมโปรเจกต์กับที่เก็บไฟล์บนเว็บ (เช่น GitHub)
+git push -u origin main – ส่งไฟล์ขึ้นเว็บครั้งแรก
+
+
+ครั้งที่2
+git add . (เลือกไฟล์ที่จะเอาขึ้น)
+git commit -m "ใส่ข้อความอธิบายว่าแก้อะไร" (บันทึกสิ่งที่แก้)
+git push (ดันขึ้นเว็บ)
